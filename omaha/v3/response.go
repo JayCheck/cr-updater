@@ -73,8 +73,9 @@ func (r *UpdateResponse) MarshalJSON() ([]byte, error) {
 		patchInfo, pInfoFound := ext.PatchList[ext.FP]
 		app.UpdateCheck = UpdateCheck{Status: GetUpdateStatus(ext)}
 		extensionName := "extension_" + strings.Replace(ext.Version, ".", "_", -1) + ".crx"
-		url := "https://" + extension.GetS3ExtensionBucketHost(ext.ID) + "/release/" + ext.ID + "/" + extensionName
-		diffURL := "https://" + extension.GetS3ExtensionBucketHost(ext.ID) + "/release/" + ext.ID + "/patches/" + ext.SHA256 + "/"
+		baseURL := extension.GetS3ExtensionBucketBaseURL(ext.ID)
+		url := baseURL + "/release/" + ext.ID + "/" + extensionName
+		diffURL := baseURL + "/release/" + ext.ID + "/patches/" + ext.SHA256 + "/"
 		if app.UpdateCheck.Status == "ok" {
 			if app.UpdateCheck.URLs == nil {
 				app.UpdateCheck.URLs = &URLs{
@@ -166,7 +167,8 @@ func (r *UpdateResponse) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 		app := App{AppID: ext.ID}
 		app.UpdateCheck = UpdateCheck{Status: GetUpdateStatus(ext)}
 		extensionName := "extension_" + strings.Replace(ext.Version, ".", "_", -1) + ".crx"
-		url := "https://" + extension.GetS3ExtensionBucketHost(ext.ID) + "/release/" + ext.ID + "/" + extensionName
+		baseURL := extension.GetS3ExtensionBucketBaseURL(ext.ID)
+		url := baseURL + "/release/" + ext.ID + "/" + extensionName
 		if app.UpdateCheck.Status == "ok" {
 			if app.UpdateCheck.URLs == nil {
 				app.UpdateCheck.URLs = &URLs{
@@ -223,6 +225,7 @@ func (r *WebStoreResponse) MarshalJSON() ([]byte, error) {
 
 	for _, ext := range *r {
 		extensionName := "extension_" + strings.Replace(ext.Version, ".", "_", -1) + ".crx"
+		baseURL := extension.GetS3ExtensionBucketBaseURL(ext.ID)
 		app := App{
 			AppID:  ext.ID,
 			Status: "ok",
@@ -230,7 +233,7 @@ func (r *WebStoreResponse) MarshalJSON() ([]byte, error) {
 				Status:   "ok",
 				SHA256:   ext.SHA256,
 				Version:  ext.Version,
-				Codebase: "https://" + extension.GetS3ExtensionBucketHost(ext.ID) + "/release/" + ext.ID + "/" + extensionName,
+				Codebase: baseURL + "/release/" + ext.ID + "/" + extensionName,
 			},
 		}
 		response.Apps = append(response.Apps, app)
@@ -268,6 +271,7 @@ func (r *WebStoreResponse) MarshalXML(e *xml.Encoder, _ xml.StartElement) error 
 
 	for _, ext := range *r {
 		extensionName := "extension_" + strings.Replace(ext.Version, ".", "_", -1) + ".crx"
+		baseURL := extension.GetS3ExtensionBucketBaseURL(ext.ID)
 		app := App{
 			AppID:  ext.ID,
 			Status: "ok",
@@ -275,7 +279,7 @@ func (r *WebStoreResponse) MarshalXML(e *xml.Encoder, _ xml.StartElement) error 
 				Status:   "ok",
 				SHA256:   ext.SHA256,
 				Version:  ext.Version,
-				Codebase: "https://" + extension.GetS3ExtensionBucketHost(ext.ID) + "/release/" + ext.ID + "/" + extensionName,
+				Codebase: baseURL + "/release/" + ext.ID + "/" + extensionName,
 			},
 		}
 		response.Apps = append(response.Apps, app)

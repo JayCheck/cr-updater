@@ -4,6 +4,14 @@ package extension
 // ourselves without redirecting to Google's component updater.
 var OfferedExtensions = Extensions{
 	{
+		ID:          "jebgalgnebhfojomionfpkfelancnnkf",
+		Version:     "1.0.0",
+		SHA256:      "6315ac809037997a028b0c6fd7af959fc7967651a3b7f800044c613f48365ffd",
+		Title:       "Triple Banana Hello Component",
+		URL:         "",
+		Size:        674,
+		Blacklisted: false,
+	}, {
 		ID:          "ldimlcelhnjgpjjemdjokpgeeikdinbm",
 		Version:     "1.0.0",
 		SHA256:      "1c714fadd4208c63f74b707e4c12b81b3ad0153c37de1348fa810dd47cfc5618",

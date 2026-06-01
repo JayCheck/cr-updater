@@ -2,6 +2,7 @@ package extension
 
 import (
 	"os"
+	"strings"
 )
 
 var (
@@ -59,6 +60,15 @@ func GetS3TorExtensionBucketHost() string {
 	return lookupEnvFallback("S3_EXTENSIONS_BUCKET_HOST_TOR", "tor.bravesoftware.com")
 }
 
+// GetS3ExtensionBucketBaseURL returns the base URL to use for accessing crx files.
+func GetS3ExtensionBucketBaseURL(id string) string {
+	if value, ok := os.LookupEnv("S3_EXTENSIONS_BUCKET_URL"); ok && value != "" {
+		return strings.TrimRight(value, "/")
+	}
+
+	return "https://" + GetS3ExtensionBucketHost(id)
+}
+
 // GetUpdateStatus returns the status of an update response for an extension
 func GetUpdateStatus(extension Extension) string {
 	if extension.Status == "" {
@@ -75,6 +85,11 @@ func GetComponentUpdaterHost() string {
 // GetExtensionUpdaterHost returns the url to use for extension updates (@updater=chromiumcrx)
 func GetExtensionUpdaterHost() string {
 	return lookupEnvFallback("EXTENSION_UPDATER_HOST", "extensionupdater.brave.com")
+}
+
+// GetUpdaterScheme returns the scheme to use for update redirects.
+func GetUpdaterScheme() string {
+	return lookupEnvFallback("UPDATER_REDIRECT_SCHEME", "https")
 }
 
 // GetUpdaterHostByType returns the appropriate updater host based on the updater type

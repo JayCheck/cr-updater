@@ -237,7 +237,7 @@ func WebStoreUpdateExtension(w http.ResponseWriter, r *http.Request) {
 		foundExtension, ok := AllExtensionsMap.Load(id)
 		if !ok && len(xValues) == 1 {
 			redirectURL := &url.URL{
-				Scheme:   "https",
+				Scheme:   extension.GetUpdaterScheme(),
 				Host:     extension.GetExtensionUpdaterHost(),
 				Path:     "/service/update2/crx",
 				RawQuery: r.URL.RawQuery, // nosemgrep: go.lang.security.injection.open-redirect.open-redirect
@@ -355,7 +355,7 @@ func UpdateExtensions(w http.ResponseWriter, r *http.Request) {
 				path = "/service/update2/json"
 			}
 			redirectURL := &url.URL{
-				Scheme:   "https",
+				Scheme:   extension.GetUpdaterScheme(),
 				Host:     host,
 				Path:     path,
 				RawQuery: r.URL.RawQuery, // nosemgrep: go.lang.security.injection.open-redirect.open-redirect

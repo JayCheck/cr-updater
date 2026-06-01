@@ -106,7 +106,8 @@ func (r *UpdateResponse) MarshalJSON() ([]byte, error) {
 
 			// Create pipeline with operations
 			extensionName := "extension_" + strings.Replace(ext.Version, ".", "_", -1) + ".crx"
-			url := "https://" + extension.GetS3ExtensionBucketHost(ext.ID) + "/release/" + ext.ID + "/" + extensionName
+			baseURL := extension.GetS3ExtensionBucketBaseURL(ext.ID)
+			url := baseURL + "/release/" + ext.ID + "/" + extensionName
 
 			// Initialize pipelines array
 			app.UpdateCheck.Pipelines = []Pipeline{}
@@ -127,8 +128,8 @@ func (r *UpdateResponse) MarshalJSON() ([]byte, error) {
 						fpPrefix = ext.FP[:8]
 					}
 					diffPipelineID := "puff_diff_" + fpPrefix
-					patchURL := "https://" + extension.GetS3ExtensionBucketHost(ext.ID) + "/release/" +
-						ext.ID + "/patches/" + ext.SHA256 + "/" + ext.FP + ".puff"
+					patchURL := baseURL + "/release/" + ext.ID + "/patches/" +
+						ext.SHA256 + "/" + ext.FP + ".puff"
 
 					// Create the Out struct for diff pipeline
 					diffOut := &Out{

@@ -3,12 +3,12 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/http"
 	_ "net/http/pprof" // pprof magic
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	batware "github.com/brave-intl/bat-go/middleware"
@@ -36,11 +36,56 @@ func setupRouter(ctx context.Context, testRouter bool) (context.Context, *chi.Mu
 	}
 
 	extensions := extension.OfferedExtensions
-	r.Mount("/extensions", controller.ExtensionsRouter(extensions, testRouter))
+	useStatic := useStaticExtensions()
+	if useStatic {
+		controller.AllExtensionsMap.StoreExtensions(&extensions)
+	}
+
+	extensionsRouter := controller.ExtensionsRouter(extensions, testRouter || useStatic)
+	r.Post("/update2/json", controller.UpdateExtensions)
+	r.Post("/update2", controller.UpdateExtensions)
+	r.Mount("/extensions", extensionsRouter)
+
+	if localCRXDir := os.Getenv("LOCAL_CRX_DIR"); localCRXDir != "" {
+		r.Handle("/release/*", http.StripPrefix("/release/", http.FileServer(http.Dir(localCRXDir))))
+	}
+
 	return ctx, r
 }
 
-// StartServer starts the component updater server on port 8192
+func useStaticExtensions() bool {
+	if value, ok := os.LookupEnv("GO_UPDATE_USE_STATIC_EXTENSIONS"); ok {
+		enabled, err := strconv.ParseBool(value)
+		return err == nil && enabled
+	}
+
+	return os.Getenv("LOCAL_CRX_DIR") != ""
+}
+
+func listenAddr() string {
+	if value := os.Getenv("GO_UPDATE_ADDR"); value != "" {
+		return value
+	}
+
+	if value := os.Getenv("PORT"); value != "" {
+		if strings.HasPrefix(value, ":") {
+			return value
+		}
+		return ":" + value
+	}
+
+	return ":8192"
+}
+
+func listenURL(addr string) string {
+	if strings.HasPrefix(addr, ":") {
+		return "http://localhost" + addr
+	}
+
+	return "http://" + addr
+}
+
+// StartServer starts the component updater server.
 func StartServer() {
 	serverCtx, log := logger.Setup(context.Background())
 	log.Info("Starting server", "prefix", "main")
@@ -67,11 +112,11 @@ func StartServer() {
 	}
 
 	serverCtx, r := setupRouter(serverCtx, false)
-	port := ":8192"
-	log.Info("Starting HTTP server", "url", fmt.Sprintf("http://localhost%s", port))
+	addr := listenAddr()
+	log.Info("Starting HTTP server", "url", listenURL(addr))
 
 	srv := http.Server{
-		Addr:        port,
+		Addr:        addr,
 		Handler:     r,
 		BaseContext: func(_ net.Listener) context.Context { return serverCtx },
 	}
