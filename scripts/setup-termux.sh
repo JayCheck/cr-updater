@@ -174,6 +174,7 @@ Run the local updater:
   GO_UPDATE_USE_STATIC_EXTENSIONS=true \\
   LOCAL_CRX_DIR=\$PWD/local_crx \\
   S3_EXTENSIONS_BUCKET_URL=${base_url} \\
+  GO_UPDATE_REDIRECT_UNKNOWN_APPLICATIONS=false \\
   LOG_REQUEST=true \\
   GOTOOLCHAIN=local go run .
 
@@ -194,6 +195,7 @@ run_server() {
   GO_UPDATE_USE_STATIC_EXTENSIONS=true \
   LOCAL_CRX_DIR="${ROOT_DIR}/local_crx" \
   S3_EXTENSIONS_BUCKET_URL="${base_url}" \
+  GO_UPDATE_REDIRECT_UNKNOWN_APPLICATIONS=false \
   LOG_REQUEST=true \
   GOTOOLCHAIN=local go run .
 }

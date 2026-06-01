@@ -141,6 +141,10 @@ func ExtensionsRouter(_ extension.Extensions, testRouter bool) chi.Router {
 	return r
 }
 
+func shouldRedirectUnknownApplications() bool {
+	return !strings.EqualFold(os.Getenv("GO_UPDATE_REDIRECT_UNKNOWN_APPLICATIONS"), "false")
+}
+
 // PrintExtensions handles requests to /extensions/all by returning a JSON representation of all
 // extensions in the database. This endpoint serves two purposes:
 // 1. Troubleshooting - allows inspection of the current extension database state
@@ -342,7 +346,7 @@ func UpdateExtensions(w http.ResponseWriter, r *http.Request) {
 
 	// Special case, if there's only 1 extension in the request and it is not something
 	// we know about, redirect the client to the appropriate update server.
-	if len(updateRequest.Extensions) == 1 {
+	if shouldRedirectUnknownApplications() && len(updateRequest.Extensions) == 1 {
 		_, ok := AllExtensionsMap.Load(updateRequest.Extensions[0].ID)
 		if !ok {
 			host := extension.GetUpdaterHostByType(updateRequest.UpdaterType)

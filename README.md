@@ -57,4 +57,5 @@ scripts/setup-termux.sh --run
 
 The local updater listens on `http://127.0.0.1:8000/update2/json` by
 default. Use `GO_UPDATE_PORT`, `GO_UPDATE_HOST`, or `GO_UPDATE_ADDR` to
-override the bind address.
+override the bind address. The setup script disables unknown-application
+redirects so Chromium-owned component checks finish locally during PoC tests.
