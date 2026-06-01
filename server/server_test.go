@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
-	"encoding/json/v2"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -524,12 +524,12 @@ func TestUpdateExtensionsV3JSON(t *testing.T) {
 
 	// Not JSON
 	requestBody = "For the king!"
-	expectedResponse = "Error parsing request: error parsing JSON request: jsontext: invalid character 'F' at start of value"
+	expectedResponse = "Error parsing request: error parsing JSON request: invalid character 'F' looking for beginning of value"
 	testCall(t, server, http.MethodPost, contentTypeJSON, "", requestBody, http.StatusBadRequest, expectedResponse, "")
 
 	// Malformed JSON
 	requestBody = "{request"
-	expectedResponse = "Error parsing request: error parsing JSON request: jsontext: invalid character 'r' at start of value after offset 1"
+	expectedResponse = "Error parsing request: error parsing JSON request: invalid character 'r' looking for beginning of object key string"
 	testCall(t, server, http.MethodPost, contentTypeJSON, "", requestBody, http.StatusBadRequest, expectedResponse, "")
 
 	lightThemeExtension := extensiontest.ExtensionRequestFnForJSON("ldimlcelhnjgpjjemdjokpgeeikdinbm")

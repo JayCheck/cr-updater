@@ -134,7 +134,7 @@ download_modules() {
   fi
 
   log "Downloading Go modules."
-  (cd "${ROOT_DIR}" && go mod download)
+  (cd "${ROOT_DIR}" && GOTOOLCHAIN=local go mod download)
 }
 
 default_addr() {
@@ -175,7 +175,7 @@ Run the local updater:
   LOCAL_CRX_DIR=\$PWD/local_crx \\
   S3_EXTENSIONS_BUCKET_URL=${base_url} \\
   LOG_REQUEST=true \\
-  go run .
+  GOTOOLCHAIN=local go run .
 
 Client update URL:
 
@@ -195,7 +195,7 @@ run_server() {
   LOCAL_CRX_DIR="${ROOT_DIR}/local_crx" \
   S3_EXTENSIONS_BUCKET_URL="${base_url}" \
   LOG_REQUEST=true \
-  go run .
+  GOTOOLCHAIN=local go run .
 }
 
 main() {

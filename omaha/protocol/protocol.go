@@ -1,9 +1,7 @@
 package protocol
 
 import (
-	"bytes"
-	"encoding/json/jsontext"
-	"encoding/json/v2"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"strings"
@@ -104,29 +102,28 @@ func AcceptsJSON(accept string) bool {
 
 // IsPingbackRequest checks if the request body is a pingback.
 // For now, it only checks JSON requests for an "events" field.
-// Uses streaming token parsing for performance - avoids full unmarshal.
 func IsPingbackRequest(body []byte, contentType string) bool {
 	if !IsJSONContentType(contentType) {
 		return false
 	}
 
-	dec := jsontext.NewDecoder(bytes.NewReader(body))
+	var pingbackCheck struct {
+		Request struct {
+			Apps []struct {
+				Events *json.RawMessage `json:"events,omitempty"`
+			} `json:"apps"`
+		} `json:"request"`
+	}
 
-	for {
-		tok, err := dec.ReadToken()
-		if err != nil {
-			return false
-		}
-
-		if tok.Kind() == '"' && tok.String() == "events" {
-			val, err := dec.ReadValue()
-			if err != nil {
-				return false
-			}
-			// Check if events array has content (length > 2 means more than just "[]")
-			if len(val) > 2 {
-				return true
+	if err := json.Unmarshal(body, &pingbackCheck); err == nil {
+		if pingbackCheck.Request.Apps != nil {
+			for _, app := range pingbackCheck.Request.Apps {
+				if app.Events != nil {
+					return true
+				}
 			}
 		}
 	}
+
+	return false
 }

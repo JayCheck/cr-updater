@@ -1,7 +1,7 @@
 package v3
 
 import (
-	"encoding/json/v2"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"strings"

@@ -1,7 +1,7 @@
 package extension
 
 import (
-	"encoding/json/v2"
+	"encoding/json"
 	"strconv"
 	"strings"
 	"sync"

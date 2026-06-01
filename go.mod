@@ -1,6 +1,6 @@
 module github.com/brave/go-update
 
-go 1.25.0
+go 1.21.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.1

@@ -1,7 +1,7 @@
 package v4
 
 import (
-	"encoding/json/v2"
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
