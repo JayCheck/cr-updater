@@ -7,6 +7,7 @@ EXPECTED_CRX_SHA256="6315ac809037997a028b0c6fd7af959fc7967651a3b7f800044c613f483
 RUN_SERVER=false
 SKIP_PKG=false
 SKIP_DOWNLOAD=false
+REDIRECT_GOOGLE=false
 
 usage() {
   cat <<'EOF'
@@ -16,6 +17,8 @@ Options:
   --run            Start the local updater after setup.
   --skip-pkg       Skip package installation.
   --skip-download  Skip go mod download.
+  --redirect-google
+                   Redirect unknown Chromium components to Google.
   -h, --help       Show this help.
 
 Environment:
@@ -35,6 +38,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-download)
       SKIP_DOWNLOAD=true
+      ;;
+    --redirect-google)
+      REDIRECT_GOOGLE=true
       ;;
     -h|--help)
       usage
@@ -146,6 +152,28 @@ default_addr() {
   printf '%s:%s\n' "${GO_UPDATE_HOST:-127.0.0.1}" "${GO_UPDATE_PORT:-8000}"
 }
 
+redirect_unknown_applications() {
+  if "${REDIRECT_GOOGLE}"; then
+    printf 'true\n'
+    return
+  fi
+
+  printf 'false\n'
+}
+
+component_updater_host() {
+  if "${REDIRECT_GOOGLE}"; then
+    printf '%s\n' "${COMPONENT_UPDATER_HOST:-update.googleapis.com}"
+    return
+  fi
+
+  printf '%s\n' "${COMPONENT_UPDATER_HOST:-componentupdater.brave.com}"
+}
+
+updater_redirect_scheme() {
+  printf '%s\n' "${UPDATER_REDIRECT_SCHEME:-https}"
+}
+
 base_url_for_addr() {
   local addr="$1"
   if [[ -n "${S3_EXTENSIONS_BUCKET_URL:-}" ]]; then
@@ -164,6 +192,9 @@ base_url_for_addr() {
 print_run_command() {
   local addr="$1"
   local base_url="$2"
+  local redirect_unknown="$3"
+  local component_host="$4"
+  local redirect_scheme="$5"
 
   cat <<EOF
 
@@ -174,7 +205,9 @@ Run the local updater:
   GO_UPDATE_USE_STATIC_EXTENSIONS=true \\
   LOCAL_CRX_DIR=\$PWD/local_crx \\
   S3_EXTENSIONS_BUCKET_URL=${base_url} \\
-  GO_UPDATE_REDIRECT_UNKNOWN_APPLICATIONS=false \\
+  GO_UPDATE_REDIRECT_UNKNOWN_APPLICATIONS=${redirect_unknown} \\
+  COMPONENT_UPDATER_HOST=${component_host} \\
+  UPDATER_REDIRECT_SCHEME=${redirect_scheme} \\
   LOG_REQUEST=true \\
   GOTOOLCHAIN=local go run .
 
@@ -188,6 +221,9 @@ EOF
 run_server() {
   local addr="$1"
   local base_url="$2"
+  local redirect_unknown="$3"
+  local component_host="$4"
+  local redirect_scheme="$5"
 
   log "Starting local updater on ${addr}"
   cd "${ROOT_DIR}"
@@ -195,7 +231,9 @@ run_server() {
   GO_UPDATE_USE_STATIC_EXTENSIONS=true \
   LOCAL_CRX_DIR="${ROOT_DIR}/local_crx" \
   S3_EXTENSIONS_BUCKET_URL="${base_url}" \
-  GO_UPDATE_REDIRECT_UNKNOWN_APPLICATIONS=false \
+  GO_UPDATE_REDIRECT_UNKNOWN_APPLICATIONS="${redirect_unknown}" \
+  COMPONENT_UPDATER_HOST="${component_host}" \
+  UPDATER_REDIRECT_SCHEME="${redirect_scheme}" \
   LOG_REQUEST=true \
   GOTOOLCHAIN=local go run .
 }
@@ -208,13 +246,21 @@ main() {
 
   local addr
   local base_url
+  local redirect_unknown
+  local component_host
+  local redirect_scheme
   addr="$(default_addr)"
   base_url="$(base_url_for_addr "${addr}")"
+  redirect_unknown="$(redirect_unknown_applications)"
+  component_host="$(component_updater_host)"
+  redirect_scheme="$(updater_redirect_scheme)"
 
-  print_run_command "${addr}" "${base_url}"
+  print_run_command "${addr}" "${base_url}" \
+    "${redirect_unknown}" "${component_host}" "${redirect_scheme}"
 
   if "${RUN_SERVER}"; then
-    run_server "${addr}" "${base_url}"
+    run_server "${addr}" "${base_url}" \
+      "${redirect_unknown}" "${component_host}" "${redirect_scheme}"
   fi
 }
 
