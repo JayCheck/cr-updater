@@ -45,3 +45,16 @@ Then:
 ## Run go-update:
 
 `./main`
+
+## Run local Triple Banana component updater on Termux:
+
+```sh
+pkg install -y git
+git clone https://github.com/JayCheck/cr-updater.git
+cd cr-updater
+scripts/setup-termux.sh --run
+```
+
+The local updater listens on `http://127.0.0.1:8000/update2/json` by
+default. Use `GO_UPDATE_PORT`, `GO_UPDATE_HOST`, or `GO_UPDATE_ADDR` to
+override the bind address.
