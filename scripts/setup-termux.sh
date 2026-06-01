@@ -14,7 +14,7 @@ Usage: scripts/setup-termux.sh [options]
 
 Options:
   --run            Start the local updater after setup.
-  --skip-pkg       Skip Termux package installation.
+  --skip-pkg       Skip package installation.
   --skip-download  Skip go mod download.
   -h, --help       Show this help.
 
@@ -66,24 +66,43 @@ install_packages() {
     return
   fi
 
-  if ! command -v pkg >/dev/null 2>&1; then
-    log "Termux pkg command not found; skipping package installation."
+  if command -v pkg >/dev/null 2>&1; then
+    log "Installing Termux packages: git golang ca-certificates coreutils"
+    pkg update -y
+    pkg install -y git golang ca-certificates coreutils
     return
   fi
 
-  log "Installing Termux packages: git golang ca-certificates coreutils"
-  pkg update -y
-  pkg install -y git golang ca-certificates coreutils
+  if command -v apt-get >/dev/null 2>&1; then
+    log "Installing apt packages: git golang-go ca-certificates coreutils"
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      git golang-go ca-certificates coreutils
+    return
+  fi
+
+  if command -v apt >/dev/null 2>&1; then
+    log "Installing apt packages: git golang-go ca-certificates coreutils"
+    apt update
+    apt install -y git golang-go ca-certificates coreutils
+    return
+  fi
+
+  log "No supported package manager found; skipping package installation."
 }
 
 verify_toolchain() {
   if ! command -v go >/dev/null 2>&1; then
-    echo "go was not found. Install it with: pkg install golang" >&2
+    echo "go was not found. Install it with one of:" >&2
+    echo "  pkg install golang" >&2
+    echo "  apt install golang-go" >&2
     exit 1
   fi
 
   if ! command -v gofmt >/dev/null 2>&1; then
-    echo "gofmt was not found. Install it with: pkg install golang" >&2
+    echo "gofmt was not found. Install it with one of:" >&2
+    echo "  pkg install golang" >&2
+    echo "  apt install golang-go" >&2
     exit 1
   fi
 
