@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_ID="jebgalgnebhfojomionfpkfelancnnkf"
-EXPECTED_CRX_SHA256="6315ac809037997a028b0c6fd7af959fc7967651a3b7f800044c613f48365ffd"
+EXPECTED_CRX_SHA256="fbdc84fdc13d0cc3dec8115b36356632846ee7f1b8e2ea17a28e2c8aa943ef3e"
 
 RUN_SERVER=false
 SKIP_PKG=false
@@ -64,7 +64,7 @@ repo_root() {
 }
 
 ROOT_DIR="$(repo_root)"
-CRX_PATH="${ROOT_DIR}/local_crx/${APP_ID}/extension_1_0_0.crx"
+CRX_PATH="${ROOT_DIR}/local_crx/${APP_ID}/extension_1_0_1.crx"
 
 install_packages() {
   if "${SKIP_PKG}"; then
