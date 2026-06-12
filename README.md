@@ -61,3 +61,25 @@ override the bind address. The setup script disables unknown-application
 redirects so Chromium-owned component checks finish locally during PoC tests.
 Use `scripts/setup-termux.sh --run --redirect-google` to redirect unknown
 Chromium-owned components to `update.googleapis.com` instead.
+
+## Triple Banana CRX hosting
+
+The Triple Banana PoC CRX is published under `docs/release/` so GitHub Pages can
+serve it at:
+
+```text
+https://jaycheck.github.io/cr-updater/release/jebgalgnebhfojomionfpkfelancnnkf/extension_1_0_1.crx
+```
+
+When running the updater server for the public APK test, keep the update check
+server behind nginx and return GitHub Pages URLs for CRX downloads:
+
+```sh
+GO_UPDATE_ADDR=127.0.0.1:8000 \
+GO_UPDATE_USE_STATIC_EXTENSIONS=true \
+LOCAL_CRX_DIR=$PWD/local_crx \
+S3_EXTENSIONS_BUCKET_URL=https://jaycheck.github.io/cr-updater \
+GO_UPDATE_REDIRECT_UNKNOWN_APPLICATIONS=false \
+LOG_REQUEST=true \
+GOTOOLCHAIN=local go run .
+```
